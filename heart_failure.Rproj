@@ -25,8 +25,7 @@ data <- read.csv("heart.csv")
 
 str(data)
 
-# takong care of the categorical datasets
-
+# taking care of the categorical datasets
 data$HeartDisease <- as.factor(data$HeartDisease)
 data$RestingECG <- as.factor(data$RestingECG)
 data$ChestPainType <- as.factor(data$ChestPainType)
