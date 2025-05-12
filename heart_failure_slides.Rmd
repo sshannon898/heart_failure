@@ -1,6 +1,6 @@
 ---
 title: "Presentation_slides"
-author: "Stephen Shannon"
+author: "Group 8, Kevine, A"
 date: "2025-05-11"
 output: ioslides_presentation
 ---
@@ -23,8 +23,38 @@ When you click the **Knit** button a document will be generated that includes bo
 
 ## Slide with R Output
 
-```{r cars, echo = TRUE}
-summary(cars)
+```{r cars, echo = TRUE, eval = FALSE}
+
+# 	* Research question: What patterns in clinical measurements and symptoms are associated with heart disease,
+#  and how do they vary across demographic groups?
+# 
+# 	* Why it matters:can help reveal which demographics (age, sex) tend to experience
+#  more severe or different symptom profiles /early warning signs in specific groups.
+# 
+# 	* What datasets are we using
+# 		* https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction/data
+# 
+# 
+# 	* Potential questions to explore: 
+# 		* How does Age and Gender relate to heart disease?
+# 		* What clinical markers are associated with heart disease?
+# 
+# 
+# 	* Interesting visualizations
+# 		* Corrplot among clinical markers -- strong association between certain markers?
+# 		* Grouped boxplot of RestingECG Categories and proportion w/ heart disease
+# 		* 3d plot between MaxHR and Oldpeak, see the joint distribution
+# 		* Potential shiny plotly app: Select different binary factors and see charts of how risk
+# 	 of heart disease changes based on selection, or how distributions of other variables change
+# 		** Needs some type of logistic reg model **
+# 
+# 	* Limitations:
+# 		* Missing other potentially important factors like weight, excercise level, diet type, etc.
+
+
+
+
+
 ```
 
 ## Slide with Plot
