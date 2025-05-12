@@ -80,9 +80,6 @@ plot5 <- ggplot(data, aes(x = Sex, y = Age, fill = HeartDisease)) +
 
 
 
-
-
-
 #ChestPainType vs HeartDisease
 plott1 <- ggplot(data, aes(x = ChestPainType, fill = HeartDisease)) +
   geom_bar(position = "fill") +
