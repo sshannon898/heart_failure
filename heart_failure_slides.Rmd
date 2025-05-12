@@ -5,31 +5,126 @@ date: "2025-05-11"
 output: ioslides_presentation
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
 
-## R Markdown
 
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r Heart Disease, warning=FALSE, message=FALSE, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+library(plotly)
+library(patchwork)
+library(scales)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+data <- read.csv("heart.csv")
 
-## Slide with Bullets
+str(data)
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+# takong care of the categorical dataset
+data$HeartDisease <- as.factor(data$HeartDisease)
+data$RestingECG <- as.factor(data$RestingECG)
+data$ChestPainType <- as.factor(data$ChestPainType)
+data$ST_Slope <- as.factor(data$ST_Slope)
+data$Sex <- as.factor(data$Sex)
+data$FastingBS <- as.factor(data$FastingBS)
 
-## Slide with R Output
 
-```{r cars, echo = TRUE}
-summary(cars)
-```
+plot1 <- ggplot(data, aes(x = MaxHR, y = Age, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Age vs MaxHR", x = "MaxHR", y = "Age") +
+theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
 
-## Slide with Plot
+plot2 <- ggplot(data, aes(x = FastingBS, y = RestingBP, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "RestingBP vs FastingBS", x = "FastingBS (>120 mg/dl = 1)", y = "Resting BP (mmHg)") +
+ theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
 
-```{r pressure}
-plot(pressure)
+plot3 <- ggplot(data, aes(x = Cholesterol, y = Age, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Age vs Cholesterol", x = "Cholesterol", y = "Age") +
+theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+
+plot4 <- ggplot(data, aes(x = Sex, y = MaxHR, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "MaxHR vs Sex", x = "Sex", y = "MaxHR") +
+ theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+
+plot5 <- ggplot(data, aes(x = Sex, y = Age, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Age vs Sex", x = "Sex", y = "Age") +
+  theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+# combine
+(plot1 | plot2) + 
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "right")
+
+
+(plot3 | plot4) / plot5 + 
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "right")
+
+
+
+#ChestPainType vs HeartDisease
+plott1 <- ggplot(data, aes(x = ChestPainType, fill = HeartDisease)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Heart Disease by Chest Pain Type",
+       x = "Chest Pain Type", y = "Proportion", fill = "Heart Disease") +
+theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+# Plot 3: Sex vs HeartDisease
+plott2 <- ggplot(data, aes(x = Sex, fill = HeartDisease)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Heart Disease by Sex",
+       x = "Sex", y = "Proportion", fill = "Heart Disease") +
+ theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+# Combine 
+(plott1  | plott2) + 
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "right")
+
+
+#    3D scatter plot
+
+plot_ly(
+  data = data,
+  x = ~MaxHR,
+  y = ~Oldpeak,
+  z = ~Cholesterol,
+  color = ~HeartDisease,
+  colors = c('blue', 'red'),
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(size = 4, opacity = 0.7, line = list(width = 0.5, color = 'gray'))
+) %>%
+  layout(
+    title = "MaxHR vs Oldpeak vs Cholesterol",
+    scene = list(
+      xaxis = list(title = "Max Heart Rate"),
+      yaxis = list(title = "Oldpeak (ST Depression)"),
+      zaxis = list(title = "Cholesterol (mg/dl)")
+    ),
+    legend = list(title = list(text = "<b>Heart Disease</b>"))
+  )
+
+
 ```
 
