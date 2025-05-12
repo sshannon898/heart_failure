@@ -1,65 +1,131 @@
 ---
 title: "Presentation_slides"
-author: "Group 8, Kevine, A"
+author: "Stephen Shannon"
 date: "2025-05-11"
 output: ioslides_presentation
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
-
-## R Markdown
-
-This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
-
-## Slide with Bullets
-
-- Bullet 1
-- Bullet 2
-- Bullet 3
-
-## Slide with R Output
-
-```{r cars, echo = TRUE, eval = FALSE}
-
-# 	* Research question: What patterns in clinical measurements and symptoms are associated with heart disease,
-#  and how do they vary across demographic groups?
-# 
-# 	* Why it matters:can help reveal which demographics (age, sex) tend to experience
-#  more severe or different symptom profiles /early warning signs in specific groups.
-# 
-# 	* What datasets are we using
-# 		* https://www.kaggle.com/datasets/fedesoriano/heart-failure-prediction/data
-# 
-# 
-# 	* Potential questions to explore: 
-# 		* How does Age and Gender relate to heart disease?
-# 		* What clinical markers are associated with heart disease?
-# 
-# 
-# 	* Interesting visualizations
-# 		* Corrplot among clinical markers -- strong association between certain markers?
-# 		* Grouped boxplot of RestingECG Categories and proportion w/ heart disease
-# 		* 3d plot between MaxHR and Oldpeak, see the joint distribution
-# 		* Potential shiny plotly app: Select different binary factors and see charts of how risk
-# 	 of heart disease changes based on selection, or how distributions of other variables change
-# 		** Needs some type of logistic reg model **
-# 
-# 	* Limitations:
-# 		* Missing other potentially important factors like weight, excercise level, diet type, etc.
 
 
+```{r Heart Disease, warning=FALSE, message=FALSE, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+library(plotly)
+library(patchwork)
+library(scales)
+
+data <- read.csv("heart.csv")
+
+str(data)
+
+# takong care of the categorical datasets
+
+data$HeartDisease <- as.factor(data$HeartDisease)
+data$RestingECG <- as.factor(data$RestingECG)
+data$ChestPainType <- as.factor(data$ChestPainType)
+data$ST_Slope <- as.factor(data$ST_Slope)
+data$Sex <- as.factor(data$Sex)
+data$FastingBS <- as.factor(data$FastingBS)
+
+
+plot1 <- ggplot(data, aes(x = MaxHR, y = Age, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Age vs MaxHR", x = "MaxHR", y = "Age") +
+theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+plot2 <- ggplot(data, aes(x = FastingBS, y = RestingBP, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "RestingBP vs FastingBS", x = "FastingBS (>120 mg/dl = 1)", y = "Resting BP (mmHg)") +
+ theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+plot3 <- ggplot(data, aes(x = Cholesterol, y = Age, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Age vs Cholesterol", x = "Cholesterol", y = "Age") +
+theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+
+plot4 <- ggplot(data, aes(x = Sex, y = MaxHR, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "MaxHR vs Sex", x = "Sex", y = "MaxHR") +
+ theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+
+plot5 <- ggplot(data, aes(x = Sex, y = Age, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Age vs Sex", x = "Sex", y = "Age") +
+  theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+# combine
+(plot1 | plot2) + 
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "right")
+
+
+(plot3 | plot4) / plot5 + 
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "right")
 
 
 
-```
+#ChestPainType vs HeartDisease
+plott1 <- ggplot(data, aes(x = ChestPainType, fill = HeartDisease)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Heart Disease by Chest Pain Type",
+       x = "Chest Pain Type", y = "Proportion", fill = "Heart Disease") +
+theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
 
-## Slide with Plot
+# Plot 3: Sex vs HeartDisease
+plott2 <- ggplot(data, aes(x = Sex, fill = HeartDisease)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = percent) +
+  labs(title = "Heart Disease by Sex",
+       x = "Sex", y = "Proportion", fill = "Heart Disease") +
+ theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
 
-```{r pressure}
-plot(pressure)
+# Combine 
+(plott1  | plott2) + 
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "right")
+
+
+#    3D scatter plot
+
+plot_ly(
+  data = data,
+  x = ~MaxHR,
+  y = ~Oldpeak,
+  z = ~Cholesterol,
+  color = ~HeartDisease,
+  colors = c('blue', 'red'),
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(size = 4, opacity = 0.7, line = list(width = 0.5, color = 'gray'))
+) %>%
+  layout(
+    title = "MaxHR vs Oldpeak vs Cholesterol",
+    scene = list(
+      xaxis = list(title = "Max Heart Rate"),
+      yaxis = list(title = "Oldpeak (ST Depression)"),
+      zaxis = list(title = "Cholesterol (mg/dl)")
+    ),
+    legend = list(title = list(text = "<b>Heart Disease</b>"))
+  )
+
+
 ```
 
