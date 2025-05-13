@@ -27,7 +27,7 @@ data$HeartDisease <- as.factor(data$HeartDisease)
 data$ChestPainType <- as.factor(data$ChestPainType)
 data$Sex <- as.factor(data$Sex)
 
-
+#box plots
 box_plot1 <- ggplot(data, aes(x = Sex, y = MaxHR, fill = HeartDisease)) +
   geom_boxplot(alpha = 0.7) +
   labs(title = "MaxHR vs Sex", x = "Sex", y = "MaxHR") +
@@ -46,17 +46,6 @@ box_plot2 <- ggplot(data, aes(x = Sex, y = Age, fill = HeartDisease)) +
 (box_plot1 | box_plot2) + 
   plot_layout(guides = "collect") & 
   theme(legend.position = "right")
-
-
-grouped_bar_plot<- ggplot(data, aes(x = ChestPainType, fill = HeartDisease)) +
-  geom_bar(position = "fill") +
-  scale_y_continuous(labels = percent) +
-  labs(title = "Heart Disease by Chest Pain Type",
-       x = "Chest Pain Type", y = "Proportion", fill = "Heart Disease") +
-theme_minimal() +
-  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
-        plot.title = element_text(hjust = 0.5, face = "bold"))
-print(grouped_bar_plot)
 
 
 # 3D scatterplot
