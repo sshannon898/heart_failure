@@ -157,6 +157,31 @@ print(grouped_bar_plot)
 
 ```
 
+## Scatterplot
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
+plot_ly(
+  data = heart_data,
+  x = ~MaxHR,
+  y = ~Age,
+  z = ~Cholesterol,
+  color = ~HeartDisease,
+  colors = c('blue', 'red'),
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(size = 4, opacity = 0.7, line = list(width = 0.5, color = 'gray'))
+) %>%
+  layout(
+    title = "MaxHR vs Age vs Cholesterol",
+    scene = list(
+      xaxis = list(title = "Max Heart Rate"),
+      yaxis = list(title = "Age"),
+      zaxis = list(title = "Cholesterol (mg/dl)")
+    ),
+    legend = list(title = list(text = "<b>Heart Disease</b>"))
+  )
+```
+
 
 ## Heatmap
 
