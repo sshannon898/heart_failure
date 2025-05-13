@@ -56,9 +56,8 @@ We are particularly interested in:
 
 
 
-## Dataset Introduction
+## Dataset 
 
-We use a publicly available dataset containing clinical measurements of patients undergoing cardiac screening.
 
 
 ## Variables
