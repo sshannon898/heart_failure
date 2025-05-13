@@ -57,7 +57,7 @@ print(grouped_bar_plot)
 plot_ly(
   data = data,
   x = ~MaxHR,
-  y = ~Oldpeak,
+  y = ~Age,
   z = ~Cholesterol,
   color = ~HeartDisease,
   colors = c('blue', 'red'),
@@ -66,10 +66,10 @@ plot_ly(
   marker = list(size = 4, opacity = 0.7, line = list(width = 0.5, color = 'gray'))
 ) %>%
   layout(
-    title = "MaxHR vs Oldpeak vs Cholesterol",
+    title = "MaxHR vs Age vs Cholesterol",
     scene = list(
       xaxis = list(title = "Max Heart Rate"),
-      yaxis = list(title = "Oldpeak (ST Depression)"),
+      yaxis = list(title = "Age"),
       zaxis = list(title = "Cholesterol (mg/dl)")
     ),
     legend = list(title = list(text = "<b>Heart Disease</b>"))
