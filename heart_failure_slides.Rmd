@@ -1,38 +1,137 @@
 ---
-title: "Presentation_slides"
-author: "Stephen Shannon"
+title: "Heart Failure"
+author: "Aaron Shikh, Stephen Shannon, Kevine Odira"
 date: "2025-05-11"
-output: ioslides_presentation
+output:
+  ioslides_presentation:
+    widescreen: true
+  slidy_presentation: default
+subtitle: "Predicting Heart Disease from Stress and ECG tests"
 ---
 
+<style>
+.remark-slide-content {
+  background-color: #f7fcfc;
+  color: #222;
+  font-family: "Helvetica", "Arial", sans-serif;
+  padding: 30px;
+}
+
+h1, h2 {
+  color: #0b7285;
+}
+
+.title-slide h1 {
+  color: #1864ab;
+}
+
+strong {
+  color: #c92a2a;
+}
 
 
-```{r Heart Disease, warning=FALSE, message=FALSE, echo=FALSE}
+</style>
+
+
+```{r setup, include=FALSE}
 library(ggplot2)
 library(dplyr)
 library(plotly)
 library(patchwork)
 library(scales)
+library(readr)
+library(tidyr)
 
-data <- read.csv("heart.csv"))
-
-# taking care of the categorical dataset
-data$HeartDisease <- as.factor(data$HeartDisease)
-data$ChestPainType <- as.factor(data$ChestPainType)
-data$Sex <- as.factor(data$Sex)
+heart_data <- read.csv("heart.csv")
+```
 
 
-box_plot1 <- ggplot(data, aes(x = Sex, y = MaxHR, fill = HeartDisease)) +
+## Research Question
+
+**What factors contribute most to the presence of heart disease?**
+
+We are particularly interested in:
+- How the heart responds to stress (via ECG measurements)
+- Whether specific test patterns help identify high-risk individuals
+
+
+
+## Dataset Introduction
+
+We use a publicly available dataset containing clinical measurements of patients undergoing cardiac screening.
+
+
+## Variables
+- **Demographics**
+  - `Age`: Patient's age in years
+  - `Sex`: Male or Female
+
+- **Cardiac Symptoms**
+  - `ChestPainType`: Type of chest pain (Typical Angina, Atypical, Non-anginal, Asymptomatic)
+  - `ExerciseAngina`: Chest pain triggered by exercise (Yes/No)
+
+- **Clinical Measurements**
+  - `RestingBP`: Resting blood pressure (mm Hg)
+  - `Cholesterol`: Serum cholesterol (mg/dL)
+  - `FastingBS`: Binary indicator if fasting blood sugar > 120 mg/dL
+  
+- **Outcome Variable**
+  - `HeartDisease`: 1 = has heart disease, 0 = no heart disease
+
+## Variables relating to Stress Test & ECG Measurements
+  - `MaxHR`: Maximum heart rate achieved
+  - `ST_Slope`: Slope of the ST segment during peak exercise (Up/Flat/Down)
+  - `Oldpeak`: ST depression during exercise (numeric)
+  - `RestingECG`: Resting electrocardiogram results (Normal, ST abnormality, LVH)
+
+
+
+## Key Predictors: RestingECG, ST_Slope, OldPeak
+
+`RestingECG`: describes the heart's electrical activity at rest:
+  - **Normal**: No abnormalities in ST segment or T waves.
+  - **ST**: ST-T wave abnormality — includes T wave inversions or ST elevation/depression.
+  - **LVH**: Left Ventricular Hypertrophy — signals enlarged heart muscle, often from high blood pressure.
+
+`ST_Slope`: describes the shape of the ST segment during peak exercise:
+  - **Up**: ST segment increases — this is the normal, healthy response.
+  - **Flat**: No change in ST segment — may indicate ischemia.
+  - **Down**: ST segment decreases — strongest indicator of potential heart disease.
+
+`Oldpeak`: represents the amount of ST segment depression measured during exercise.  
+  - A higher value indicates potential **ischemia** (oxygen deprivation in the heart).
+  - Measured in millimeters (mm)
+
+
+
+## Distribution of Oldpeak by ST_Slope
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
+heart_data$ST_Slope <- factor(heart_data$ST_Slope, levels = c("Up", "Flat", "Down"))
+
+ggplot(heart_data, aes(x = ST_Slope, y = Oldpeak, fill = ST_Slope)) +
+  geom_violin(trim = FALSE, alpha = 0.5) +
+  geom_boxplot(width = 0.1, outlier.size = 0.8, color = "black") +
+  labs(title = "Oldpeak by ST_Slope",
+       x = "ST Slope",
+       y = "Oldpeak (ST Depression)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+## Box plots
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
+box_plot1 <- ggplot(heart_data, aes(x = Sex, y = MaxHR, fill = factor(HeartDisease))) +
   geom_boxplot(alpha = 0.7) +
-  labs(title = "MaxHR vs Sex", x = "Sex", y = "MaxHR") +
- theme_minimal() +
+  labs(title = "MaxHR vs Sex", x = "Sex", y = "MaxHR", fill = "Heart Disease") +
+  theme_minimal() +
   theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
         plot.title = element_text(hjust = 0.5, face = "bold"))
 
-
-box_plot2 <- ggplot(data, aes(x = Sex, y = Age, fill = HeartDisease)) +
+box_plot2 <- ggplot(heart_data, aes(x = Sex, y = Age, fill = factor(HeartDisease))) +
   geom_boxplot(alpha = 0.7) +
-  labs(title = "Age vs Sex", x = "Sex", y = "Age") +
+  labs(title = "Age vs Sex", x = "Sex", y = "Age", fill = "Heart Disease") +
   theme_minimal() +
   theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
         plot.title = element_text(hjust = 0.5, face = "bold"))
@@ -42,7 +141,12 @@ box_plot2 <- ggplot(data, aes(x = Sex, y = Age, fill = HeartDisease)) +
   theme(legend.position = "right")
 
 
-grouped_bar_plot<- ggplot(data, aes(x = ChestPainType, fill = HeartDisease)) +
+```
+
+## Bar Plot
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
+grouped_bar_plot<- ggplot(heart_data, aes(x = ChestPainType, fill = factor(HeartDisease))) +
   geom_bar(position = "fill") +
   scale_y_continuous(labels = percent) +
   labs(title = "Heart Disease by Chest Pain Type",
@@ -52,28 +156,45 @@ theme_minimal() +
         plot.title = element_text(hjust = 0.5, face = "bold"))
 print(grouped_bar_plot)
 
+```
 
-# 3D scatterplot
+
+## Heatmap
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
+heart_data <- heart_data %>%
+  mutate(OldpeakBin = cut(Oldpeak,
+    breaks = c(-Inf, 0, 1, 2, 3, Inf),
+    labels = c("0", "0–1", "1–2", "2-3", ">3"),
+    right = TRUE, include.lowest = TRUE))
+
+
+heatmap_df <- heart_data %>%
+  group_by(RestingECG, OldpeakBin) %>%
+  summarise(HeartDiseaseRate = mean(HeartDisease), .groups = "drop") %>%
+  pivot_wider(names_from = OldpeakBin, values_from = HeartDiseaseRate)
+
+z_matrix <- as.matrix(heatmap_df[,-1])
+rownames(z_matrix) <- heatmap_df$RestingECG
+
 plot_ly(
-  data = data,
-  x = ~MaxHR,
-  y = ~Age,
-  z = ~Cholesterol,
-  color = ~HeartDisease,
-  colors = c('blue', 'red'),
-  type = "scatter3d",
-  mode = "markers",
-  marker = list(size = 4, opacity = 0.7, line = list(width = 0.5, color = 'gray'))
+  x = colnames(z_matrix),
+  y = rownames(z_matrix),
+  z = z_matrix,
+  type = "heatmap",
+  colorscale = "Reds",
+  hovertemplate = "RestingECG: %{y}<br>Oldpeak: %{x}<br>Rate: %{z:.2f}<extra></extra>"
 ) %>%
   layout(
-    title = "MaxHR vs Age vs Cholesterol",
-    scene = list(
-      xaxis = list(title = "Max Heart Rate"),
-      yaxis = list(title = "Age"),
-      zaxis = list(title = "Cholesterol (mg/dl)")
-    ),
-    legend = list(title = list(text = "<b>Heart Disease</b>"))
+    title = "Heart Disease Rate by RestingECG and Oldpeak",
+    xaxis = list(title = "Oldpeak"),
+    yaxis = list(title = "Resting ECG")
   )
 
 ```
+
+
+
+
+
 
