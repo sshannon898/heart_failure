@@ -43,6 +43,10 @@ library(readr)
 library(tidyr)
 
 heart_data <- read.csv("heart.csv")
+
+heart_data$HeartDisease <- as.factor(heart_data$HeartDisease)
+heart_data$ChestPainType <- as.factor(heart_data$ChestPainType)
+heart_data$Sex <- as.factor(heart_data$Sex)
 ```
 
 
@@ -56,8 +60,9 @@ We are particularly interested in:
 
 
 
-## Dataset 
+## Dataset Introduction
 
+We use a publicly available dataset containing clinical measurements of patients undergoing cardiac screening.
 
 
 ## Variables
@@ -121,14 +126,14 @@ ggplot(heart_data, aes(x = ST_Slope, y = Oldpeak, fill = ST_Slope)) +
 ## Box plots
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
-box_plot1 <- ggplot(heart_data, aes(x = Sex, y = MaxHR, fill = factor(HeartDisease))) +
+box_plot1 <- ggplot(heart_data, aes(x = Sex, y = MaxHR, fill = HeartDisease)) +
   geom_boxplot(alpha = 0.7) +
   labs(title = "MaxHR vs Sex", x = "Sex", y = "MaxHR", fill = "Heart Disease") +
   theme_minimal() +
   theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
         plot.title = element_text(hjust = 0.5, face = "bold"))
 
-box_plot2 <- ggplot(heart_data, aes(x = Sex, y = Age, fill = factor(HeartDisease))) +
+box_plot2 <- ggplot(heart_data, aes(x = Sex, y = Age, fill = HeartDisease)) +
   geom_boxplot(alpha = 0.7) +
   labs(title = "Age vs Sex", x = "Sex", y = "Age", fill = "Heart Disease") +
   theme_minimal() +
@@ -145,7 +150,7 @@ box_plot2 <- ggplot(heart_data, aes(x = Sex, y = Age, fill = factor(HeartDisease
 ## Bar Plot
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
-grouped_bar_plot<- ggplot(heart_data, aes(x = ChestPainType, fill = factor(HeartDisease))) +
+grouped_bar_plot<- ggplot(heart_data, aes(x = ChestPainType, fill = HeartDisease)) +
   geom_bar(position = "fill") +
   scale_y_continuous(labels = percent) +
   labs(title = "Heart Disease by Chest Pain Type",
@@ -182,18 +187,18 @@ plot_ly(
   )
 ```
 
-
 ## Heatmap
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, fig.align='center'}
-heart_data <- heart_data %>%
+heart_data$HeartDisease <- as.numeric(as.character(heart_data$HeartDisease))
+old_peak_binned <- heart_data %>%
   mutate(OldpeakBin = cut(Oldpeak,
     breaks = c(-Inf, 0, 1, 2, 3, Inf),
     labels = c("0", "0–1", "1–2", "2-3", ">3"),
     right = TRUE, include.lowest = TRUE))
 
 
-heatmap_df <- heart_data %>%
+heatmap_df <- old_peak_binned %>%
   group_by(RestingECG, OldpeakBin) %>%
   summarise(HeartDiseaseRate = mean(HeartDisease), .groups = "drop") %>%
   pivot_wider(names_from = OldpeakBin, values_from = HeartDiseaseRate)
