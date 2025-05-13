@@ -87,7 +87,7 @@ theme_minimal() +
   theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
         plot.title = element_text(hjust = 0.5, face = "bold"))
 
-# Plot 3: Sex vs HeartDisease
+# Sex vs HeartDisease
 plott2 <- ggplot(data, aes(x = Sex, fill = HeartDisease)) +
   geom_bar(position = "fill") +
   scale_y_continuous(labels = percent) +
