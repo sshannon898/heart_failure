@@ -51,6 +51,16 @@ server <- function(input, output, session) {
     if (input$hd_filter == "Both") df else df %>% filter(HeartDisease == input$hd_filter)
   })
   
+  selected_level <- reactive({
+    click <- event_data("plotly_click", source = "main")
+    if (!is.null(click)) {
+      level_clicked <- click$x
+      as.character(level_clicked)
+    } else {
+      NULL
+    }
+  })
+  
   # Reactive: dynamically filtered by relayout and legend selection
   filtered_data <- reactive({
     df_filtered <- base_filtered()
@@ -63,19 +73,17 @@ server <- function(input, output, session) {
         filter(get(var) >= relayout[["xaxis.range[0]"]], get(var) <= relayout[["xaxis.range[1]"]])
     }
     
-    if (var %in% cat_vars && !is.null(restyle)) {
-      visibility <- unlist(restyle[["visible"]])
-      levels_all <- levels(factor(df[[var]]))
-      levels_on <- levels_all[is.na(visibility) | visibility == TRUE]
-      df_filtered <- df_filtered %>% filter(get(var) %in% levels_on)
+    if (var %in% cat_vars && !is.null(selected_level())) {
+      df_filtered <- df_filtered %>% filter(get(var) == selected_level())
     }
+    
     
     df_filtered
   })
   
   # Render first plot
   output$var_plot <- renderPlotly({
-    df_filtered <- base_filtered()
+    df_filtered <- df
     var <- input$var_select
     
     if (var %in% num_vars) {
@@ -83,7 +91,7 @@ server <- function(input, output, session) {
         add_histogram() %>%
         layout(title = paste("Histogram of", var), xaxis = list(title = var))
       event_register(p, "plotly_relayout")
-      event_register(p, "plotly_restyle")
+      # event_register(p, "plotly_restyle")
       p
     } else if (var %in% cat_vars) {
       df_counts <- df_filtered %>% count(!!sym(var))
@@ -105,7 +113,7 @@ server <- function(input, output, session) {
           legend = list(title = list(text = var))
         )
       event_register(p, "plotly_relayout")
-      event_register(p, "plotly_restyle")
+      # event_register(p, "plotly_restyle")
       p
     }
   })
@@ -114,19 +122,19 @@ server <- function(input, output, session) {
   output$second_plot <- renderPlot({
     req(input$var_second)
     df_plot <- filtered_data()
-    var_other <- input$var_second
+    var2 <- input$var_second
     
-    if (var_other %in% num_vars) {
-      ggplot(df_plot, aes(x = .data[[var_other]])) +
+    if (var2 %in% num_vars) {
+      ggplot(df_plot, aes(x = .data[[var2]])) +
         geom_histogram(binwidth = 10, fill = "steelblue", color = "white") +
         theme_minimal() +
-        labs(title = paste("Histogram of", var_other), x = var_other, y = "Count")
-    } else if (var_other %in% cat_vars) {
-      ggplot(df_plot, aes(x = .data[[var_other]], fill = .data[[var_other]])) +
+        labs(title = paste("Histogram of", var2), x = var2, y = "Count")
+    } else {
+      ggplot(df_plot, aes(x = .data[[var2]], fill = .data[[var2]])) +
         geom_bar() +
         theme_minimal() +
         scale_fill_brewer(palette = "Set2") +
-        labs(title = paste("Barplot of", var_other), x = var_other, y = "Count")
+        labs(title = paste("Barplot of", var2), x = var2, y = "Count")
     }
   })
 }
