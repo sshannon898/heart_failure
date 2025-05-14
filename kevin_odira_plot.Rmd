@@ -1,0 +1,68 @@
+---
+title: "Untitled"
+author: "Stephen Shannon"
+date: "2025-05-14"
+output: html_document
+---
+
+```{r}
+
+library(ggplot2)
+library(dplyr)
+library(plotly)
+library(patchwork)
+library(scales)
+
+data <- read.csv("heart.csv"))
+
+# taking care of the categorical dataset
+data$HeartDisease <- as.factor(data$HeartDisease)
+data$ChestPainType <- as.factor(data$ChestPainType)
+data$Sex <- as.factor(data$Sex)
+
+#box plots
+box_plot1 <- ggplot(data, aes(x = Sex, y = MaxHR, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "MaxHR vs Sex", x = "Sex", y = "MaxHR") +
+ theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+
+box_plot2 <- ggplot(data, aes(x = Sex, y = Age, fill = HeartDisease)) +
+  geom_boxplot(alpha = 0.7) +
+  labs(title = "Age vs Sex", x = "Sex", y = "Age") +
+  theme_minimal() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 0.7),
+        plot.title = element_text(hjust = 0.5, face = "bold"))
+
+(box_plot1 | box_plot2) + 
+  plot_layout(guides = "collect") & 
+  theme(legend.position = "right")
+
+
+# 3D scatterplot
+plot_ly(
+  data = data,
+  x = ~MaxHR,
+  y = ~Age,
+  z = ~Cholesterol,
+  color = ~HeartDisease,
+  colors = c('blue', 'red'),
+  type = "scatter3d",
+  mode = "markers",
+  marker = list(size = 4, opacity = 0.7, line = list(width = 0.5, color = 'gray'))
+) %>%
+  layout(
+    title = "MaxHR vs Age vs Cholesterol",
+    scene = list(
+      xaxis = list(title = "Max Heart Rate"),
+      yaxis = list(title = "Age"),
+      zaxis = list(title = "Cholesterol (mg/dl)")
+    ),
+    legend = list(title = list(text = "<b>Heart Disease</b>"))
+  )
+
+
+```
+
