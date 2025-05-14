@@ -13,7 +13,7 @@ library(plotly)
 library(patchwork)
 library(scales)
 
-data <- read.csv("heart.csv"))
+data <- read.csv("heart.csv")
 
 # taking care of the categorical dataset
 data$HeartDisease <- as.factor(data$HeartDisease)
